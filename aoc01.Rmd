@@ -1,0 +1,45 @@
+---
+title: "AOC 1"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+raw_dat <- read.csv("aoc01.txt",
+                    blank.lines.skip = FALSE,
+                    header = FALSE) |>
+  rename(calories = V1) |> 
+  mutate(elf = NA)
+
+raw_dat
+```
+```{r}
+elf_i <- 1
+
+for (r in 1:nrow(raw_dat)) {
+  if (!is.na(raw_dat$calories[r]))
+    raw_dat$elf[r] <- elf_i
+  else
+    elf_i <- elf_i + 1
+}
+
+dat <- raw_dat |> na.omit()
+dat
+```
+
+```{r}
+elf_sums <- dat |>
+  group_by(elf) |>
+  summarise(total_cals = sum(calories))
+elf_sums
+```
+
+```{r}
+max(elf_sums$total_cals)
+```
