@@ -1,0 +1,102 @@
+---
+title: "AOC 2"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+raw_dat <- read.csv("aoc02.txt",
+                    blank.lines.skip = FALSE,
+                    header = FALSE,
+                    sep = " ") |>
+  rename(them = V1,
+         me = V2)
+
+raw_dat
+```
+
+Them: A for Rock, B for Paper, and C for Scissors
+
+Me: X for Rock, Y for Paper, and Z for Scissors
+
+
+```{r}
+move_names <- c("rock", "paper", "scissors")
+```
+
+
+"The score for a single round is the score for the shape you selected (1 for Rock, 2 for Paper, and 3 for Scissors) plus the score for the outcome of the round (0 if you lost, 3 if the round was a draw, and 6 if you won)."
+
+
+```{r}
+scorer <- expand.grid(them_name = move_names,
+            me_name = move_names) |>
+  mutate(
+    outcome_me = c(
+      "draw",
+      "lose",
+      "win",
+      "win",
+      "draw",
+      "lose",
+      "lose",
+      "win",
+      "draw"
+    ),
+    them = rep(LETTERS[1:3], 3),
+    me   = c(rep("X", 3),
+             rep("Y", 3),
+             rep("Z", 3)),
+    outcome_score_me = case_when(
+      outcome_me == "lose" ~ 0,
+      outcome_me == "draw" ~ 3,
+      outcome_me == "win"  ~ 6),
+    move_score_me = case_when(
+      me_name == "rock"     ~ 1,
+      me_name == "paper"    ~ 2,
+      me_name == "scissors" ~ 3),
+    total_score_me = outcome_score_me + move_score_me
+  )
+```
+
+
+
+```{r}
+dat <- left_join(raw_dat, scorer)
+dat
+```
+
+
+Part 1:
+
+```{r}
+sum(dat$total_score_me)
+```
+
+Part 2:
+
+"Anyway, the second column says how the round needs to end: X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
+
+
+```{r}
+raw_dat_2 <- raw_dat |>
+  mutate(outcome_me = case_when(me == "X" ~ "lose",
+                                me == "Y" ~ "draw",
+                                me == "Z" ~ "win")) |>
+  select(-me)
+raw_dat_2
+```
+
+```{r}
+dat2 <- left_join(raw_dat_2, scorer)
+dat2 
+```
+
+```{r}
+sum(dat2$total_score_me)
+```
