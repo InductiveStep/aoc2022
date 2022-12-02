@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="@Andi@tech.lgbt" />
 
 
-<title>AOC 1</title>
+<title>Day 1: Calorie Counting</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1743,7 +1744,8 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">AOC 1</h1>
+<h1 class="title toc-ignore">Day 1: Calorie Counting</h1>
+<h4 class="author"><span class="citation">@Andi</span><span class="citation">@tech.lgbt</span></h4>
 
 </div>
 
@@ -1840,7 +1842,7 @@ elf_sums</code></pre>
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkFPQyAxIg0Kb3V0cHV0OiANCiAgaHRtbF9ub3RlYm9vazogDQogICAgY29kZV9mb2xkaW5nOiBub25lDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmBgYA0KDQpgYGB7cn0NCnJhd19kYXQgPC0gcmVhZC5jc3YoImFvYzAxLnR4dCIsDQogICAgICAgICAgICAgICAgICAgIGJsYW5rLmxpbmVzLnNraXAgPSBGQUxTRSwNCiAgICAgICAgICAgICAgICAgICAgaGVhZGVyID0gRkFMU0UpIHw+DQogIHJlbmFtZShjYWxvcmllcyA9IFYxKSB8PiANCiAgbXV0YXRlKGVsZiA9IE5BKQ0KDQpyYXdfZGF0DQpgYGANCmBgYHtyfQ0KZWxmX2kgPC0gMQ0KDQpmb3IgKHIgaW4gMTpucm93KHJhd19kYXQpKSB7DQogIGlmICghaXMubmEocmF3X2RhdCRjYWxvcmllc1tyXSkpDQogICAgcmF3X2RhdCRlbGZbcl0gPC0gZWxmX2kNCiAgZWxzZQ0KICAgIGVsZl9pIDwtIGVsZl9pICsgMQ0KfQ0KDQpkYXQgPC0gcmF3X2RhdCB8PiBuYS5vbWl0KCkNCmRhdA0KYGBgDQoNCmBgYHtyfQ0KZWxmX3N1bXMgPC0gZGF0IHw+DQogIGdyb3VwX2J5KGVsZikgfD4NCiAgc3VtbWFyaXNlKHRvdGFsX2NhbHMgPSBzdW0oY2Fsb3JpZXMpKQ0KZWxmX3N1bXMNCmBgYA0KDQpQYXJ0IDE6DQoNCmBgYHtyfQ0KbWF4KGVsZl9zdW1zJHRvdGFsX2NhbHMpDQpgYGANCg0KDQpQYXJ0IDI6DQoNCg0KYGBge3J9DQpzb3J0KGVsZl9zdW1zJHRvdGFsX2NhbHMsIGRlY3JlYXNpbmcgPSBUUlVFKVsxOjNdIHw+IHN1bSgpDQpgYGANCg0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRheSAxOiBDYWxvcmllIENvdW50aW5nIg0KYXV0aG9yOiAiQEFuZGlAdGVjaC5sZ2J0Ig0Kb3V0cHV0OiANCiAgaHRtbF9ub3RlYm9vazogDQogICAgY29kZV9mb2xkaW5nOiBub25lDQotLS0NCg0KYGBge3J9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmBgYA0KDQpgYGB7cn0NCnJhd19kYXQgPC0gcmVhZC5jc3YoImFvYzAxLnR4dCIsDQogICAgICAgICAgICAgICAgICAgIGJsYW5rLmxpbmVzLnNraXAgPSBGQUxTRSwNCiAgICAgICAgICAgICAgICAgICAgaGVhZGVyID0gRkFMU0UpIHw+DQogIHJlbmFtZShjYWxvcmllcyA9IFYxKSB8PiANCiAgbXV0YXRlKGVsZiA9IE5BKQ0KDQpyYXdfZGF0DQpgYGANCmBgYHtyfQ0KZWxmX2kgPC0gMQ0KDQpmb3IgKHIgaW4gMTpucm93KHJhd19kYXQpKSB7DQogIGlmICghaXMubmEocmF3X2RhdCRjYWxvcmllc1tyXSkpDQogICAgcmF3X2RhdCRlbGZbcl0gPC0gZWxmX2kNCiAgZWxzZQ0KICAgIGVsZl9pIDwtIGVsZl9pICsgMQ0KfQ0KDQpkYXQgPC0gcmF3X2RhdCB8PiBuYS5vbWl0KCkNCmRhdA0KYGBgDQoNCmBgYHtyfQ0KZWxmX3N1bXMgPC0gZGF0IHw+DQogIGdyb3VwX2J5KGVsZikgfD4NCiAgc3VtbWFyaXNlKHRvdGFsX2NhbHMgPSBzdW0oY2Fsb3JpZXMpKQ0KZWxmX3N1bXMNCmBgYA0KDQpQYXJ0IDE6DQoNCmBgYHtyfQ0KbWF4KGVsZl9zdW1zJHRvdGFsX2NhbHMpDQpgYGANCg0KDQpQYXJ0IDI6DQoNCg0KYGBge3J9DQpzb3J0KGVsZl9zdW1zJHRvdGFsX2NhbHMsIGRlY3JlYXNpbmcgPSBUUlVFKVsxOjNdIHw+IHN1bSgpDQpgYGANCg0K</div>
 
 
 
