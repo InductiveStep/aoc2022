@@ -12,8 +12,8 @@ library(tidyverse)
 
 ```{r}
 dat <- read.csv("aoc03.txt",
-                    blank.lines.skip = FALSE,
-                    header = FALSE) |>
+                blank.lines.skip = FALSE,
+                header = FALSE) |>
   rename(code = V1)
 
 dat
