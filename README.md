@@ -7,3 +7,5 @@ Solutions:
 [Day 1: Calorie Counting](https://inductivestep.github.io/aoc2022/aoc01.nb.html)
 
 [Day 2: Rock Paper Scissors](https://inductivestep.github.io/aoc2022/aoc02.nb.html)
+
+[Day 3: Rucksack Reorganization](https://inductivestep.github.io/aoc2022/aoc03.nb.html)

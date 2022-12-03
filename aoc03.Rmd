@@ -1,0 +1,126 @@
+---
+title: "Day 3: Rucksack Reorganization"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+dat <- read.csv("aoc03.txt",
+                    blank.lines.skip = FALSE,
+                    header = FALSE) |>
+  rename(code = V1)
+
+dat
+```
+
+
+```{r}
+priorities <- c(letters, LETTERS)
+
+priority <- Vectorize(function(i) {
+  which(priorities == i)
+})
+```
+
+
+```{r}
+test <- dat$code[1]
+test
+```
+
+```{r}
+comparts <- function(r) {
+  n <- str_length(r)
+  stopifnot(n %% 2 == 0)
+  substring(r, c(1,n/2 + 1), c(n/2, n))
+}
+```
+
+```{r}
+comparts(test)
+```
+```{r}
+str2vec <- function(s) {
+  strsplit(s,"")[[1]]
+}
+```
+
+```{r}
+comparts(test)[1] |> str2vec()
+```
+
+I'm assuming it wants an item *type*, i.e., if there are two of an item type in both compartments, we only want one letter returned.
+
+```{r}
+compart_intersect <- Vectorize(function(r) {
+  cs <- comparts(r)
+  left  <- str2vec(cs[1])
+  right <- str2vec(cs[2])
+  intersect(left, right)
+})
+```
+
+```{r}
+compart_intersect(test)
+```
+
+```{r}
+dat$intersect <- compart_intersect(dat$code)
+```
+
+```{r}
+str_length(dat$intersect) |> max()
+```
+
+```{r}
+dat$priority <- priority(dat$intersect)
+```
+
+
+Part 1:
+
+```{r}
+sum(dat$priority)
+```
+
+Part 2:
+
+```{r}
+nrow(dat) %% 3
+```
+
+```{r}
+group_priorities <- rep(NA, nrow(dat) / 3)
+```
+
+
+```{r}
+group <- 1
+for (r in seq(1, nrow(dat), 3)) {
+  r1 <- dat$code[r]   |> str2vec()
+  r2 <- dat$code[r+1] |> str2vec()
+  r3 <- dat$code[r+2] |> str2vec()
+  
+  intersect_r <- intersect(intersect(r1, r2), r3)
+  stopifnot(length(intersect_r) == 1)
+  
+  group_priorities[group] <- priority(intersect_r)
+  group <- group + 1
+}
+```
+
+
+```{r}
+group_priorities
+```
+
+
+```{r}
+sum(group_priorities)
+```
