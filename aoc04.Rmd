@@ -85,4 +85,23 @@ sum(dat$nonempty_intersect)
 ```
 
 
+## Another go at reading in the data
+
+Maybe this would have made it easier...? Saving here in case it's handy for a future puzzle.
+
+```{r}
+dat_again <- read_lines("aoc04.txt") |>
+  str_split_fixed("[,-]", 4) |>
+  as.tibble() |>
+  mutate_all(as.integer) |>
+  rename(e1_l = V1,
+         e1_r = V2,
+         e2_l = V3,
+         e2_r = V4)
+
+dat_again
+```
+
+
+
 
