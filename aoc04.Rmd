@@ -1,0 +1,88 @@
+---
+title: "Day 4: Camp Cleanup"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+dat <- read.csv("aoc04.txt",
+                blank.lines.skip = FALSE,
+                header = FALSE) |>
+  rename(e1 = V1, e2 = V2)
+
+dat
+```
+
+
+```{r}
+expand_range <- function(r) {
+  interval <- str_split_fixed(r, "-", 2) |> as.numeric()
+  interval[1]:interval[2]
+}
+```
+
+
+```{r}
+expand_range("2-4")
+```
+
+
+```{r}
+subsetOf <- Vectorize(function(e1, e2) {
+  r1 <- expand_range(e1)
+  r2 <- expand_range(e2)
+  
+  all(r1 %in% r2)
+})
+```
+
+
+```{r}
+dat <- dat |>
+  mutate(
+    e1_in_e2 = subsetOf(e1, e2),
+    e2_in_e1 = subsetOf(e2, e1),
+    fully_contain = e1_in_e2 | e2_in_e1
+  )
+dat
+```
+
+Part 1:
+
+```{r}
+sum(dat$fully_contain)
+```
+
+Part 2:
+
+```{r}
+nonempty_intersect <- Vectorize(function(e1, e2) {
+  r1 <- expand_range(e1)
+  r2 <- expand_range(e2)
+  
+  length(intersect(r1, r2)) > 0
+})
+```
+
+
+```{r}
+dat <- dat |>
+  mutate(
+    nonempty_intersect = nonempty_intersect(e1, e2)
+  )
+dat |>
+  select(e1, e2, nonempty_intersect)
+```
+
+```{r}
+sum(dat$nonempty_intersect)
+```
+
+
+

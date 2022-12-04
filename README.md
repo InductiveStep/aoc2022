@@ -9,3 +9,5 @@ Solutions:
 [Day 2: Rock Paper Scissors](https://inductivestep.github.io/aoc2022/aoc02.nb.html)
 
 [Day 3: Rucksack Reorganization](https://inductivestep.github.io/aoc2022/aoc03.nb.html)
+
+[Day 4: Camp Cleanup](https://inductivestep.github.io/aoc2022/aoc04.nb.html)
