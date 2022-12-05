@@ -68,7 +68,7 @@ mess_width
 ```{r}
 half_fixed <- str_split_fixed(state_raw,
                               pattern = "",
-                              n = 35)[, seq(2, mess_width, 4)]
+                              n = mess_width)[, seq(2, mess_width, 4)]
 half_fixed
 ```
 
