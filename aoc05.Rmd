@@ -6,7 +6,7 @@ output:
     code_folding: none
 ---
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 ```
 
@@ -14,7 +14,7 @@ library(tidyverse)
 
 ```{r}
 raw_dat <- read_lines("aoc05.txt")
-head(raw_dat, 20)
+head(raw_dat, 15)
 ```
 
 Well, what a mess!
@@ -31,7 +31,7 @@ state_raw <- raw_dat[1:(blanks[1] - 2)]
 state_raw
 ```
 
-That state representation is going to be tedious to fix. I want it to be something like a list of stacks.
+That state representation is going to be tedious to fix. I want it to be something like a list of stacks. Let's leave that for a moment.
 
 ### Moves data
 
@@ -45,7 +45,7 @@ moves_raw |> head(5)
 ```{r}
 moves <- moves_raw |>
   str_split_fixed(" ", 6) |>
-  as_tibble() |>
+  as_tibble(.names_repair = "unique") |>
   select(V2, V4, V6) |>
   rename(
     n    = V2,
@@ -83,7 +83,7 @@ puzzle_state
 
 ## Stack
 
-I'll represent as stack as a vector.
+I'll represent a stack as a vector.
 
 ```{r}
 empty_stack <- function() {
@@ -223,11 +223,6 @@ the_answer <- trans_states(puzzle_state,
                            moves$n,
                            moves$from,
                            moves$to)
-the_answer
-```
-
-```{r}
-length(the_answer)
 ```
 
 ```{r}
@@ -250,7 +245,7 @@ YES!
 
 # Part 2
 
-Okay, I'm going to do something unforgivably hacky -- some surgery on `move_n`.
+Okay, I'm going to do something unforgivably hacky -- some surgery on `move_n`:
 
 ```{r}
 rev_tail <- function(x, n) {
@@ -277,10 +272,13 @@ move_n_9001 <- function(n, source, target) {
 }
 ```
 
+(I had some test code in here -- removed for ease of reading.) Now that it works, replace `move_n` with it:
+
 ```{r}
 move_n <- move_n_9001
 ```
 
+And go again with the previous pipeline:
 
 ```{r}
 the_answer_9001 <- trans_states(puzzle_state,
@@ -290,6 +288,6 @@ the_answer_9001 <- trans_states(puzzle_state,
 the_answer_9001 |> print_tops() |> paste(collapse = "")
 ```
 
-Phew - it worked!
+Phew -- it worked!
 
 
