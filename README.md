@@ -11,3 +11,5 @@ Solutions:
 [Day 3: Rucksack Reorganization](https://inductivestep.github.io/aoc2022/aoc03.nb.html)
 
 [Day 4: Camp Cleanup](https://inductivestep.github.io/aoc2022/aoc04.nb.html)
+
+[Day 5: Supply Stacks](https://inductivestep.github.io/aoc2022/aoc05.nb.html)

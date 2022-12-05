@@ -1,0 +1,295 @@
+---
+title: "Day 5: Supply Stacks"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r}
+library(tidyverse)
+```
+
+## Sort out the data
+
+```{r}
+raw_dat <- read_lines("aoc05.txt")
+head(raw_dat, 20)
+```
+
+Well, what a mess!
+
+I'll begin by separating the state from the move data.
+
+```{r}
+blanks <- which(raw_dat == "")
+stopifnot(length(blanks) >= 1)
+```
+
+```{r}
+state_raw <- raw_dat[1:(blanks[1] - 2)]
+state_raw
+```
+
+That state representation is going to be tedious to fix. I want it to be something like a list of stacks.
+
+### Moves data
+
+The moves data is easier:
+
+```{r}
+moves_raw <- raw_dat[(blanks[1] + 1):length(raw_dat)]
+moves_raw |> head(5)
+```
+
+```{r}
+moves <- moves_raw |>
+  str_split_fixed(" ", 6) |>
+  as_tibble() |>
+  select(V2, V4, V6) |>
+  rename(
+    n    = V2,
+    from = V4,
+    to   = V6
+  ) |>
+  mutate_all(as.integer)
+head(moves)
+```
+
+### State data
+
+This is dirty.
+
+```{r}
+mess_width <- str_length(state_raw[1])
+mess_width
+```
+
+```{r}
+half_fixed <- str_split_fixed(state_raw,
+                              pattern = "",
+                              n = 35)[, seq(2, mess_width, 4)]
+half_fixed
+```
+
+```{r}
+puzzle_state <- list()
+for (i in 1:ncol(half_fixed)) {
+  puzzle_state[[i]] <- half_fixed[,i] |> rev()
+  puzzle_state[[i]] <- puzzle_state[[i]][puzzle_state[[i]] != " "]
+}
+puzzle_state
+```
+
+## Stack
+
+I'll represent as stack as a vector.
+
+```{r}
+empty_stack <- function() {
+  c()
+}
+```
+
+```{r}
+is_empty <- function(s) {
+  length(s) == 0
+}
+```
+
+```{r}
+is_empty(empty_stack())
+```
+
+```{r}
+push <- function(s, e) {
+  stopifnot(length(e) == 1)
+  c(s, e)
+}
+```
+
+```{r}
+test_stack <- push(empty_stack(), "a") |> push("b") |> push("c")
+test_stack
+```
+
+```{r}
+pop <- function(s) {
+  stopifnot(length(s) > 0)
+  head(s, length(s) - 1)
+}
+```
+
+```{r}
+top <- function(s) {
+  stopifnot(length(s) >= 1)
+  s[length(s)]
+}
+```
+
+```{r}
+top(test_stack)
+```
+```{r}
+pop(test_stack)
+```
+
+```{r}
+move <- function(source, target) {
+  new_target <- target |> push(top(source))
+  new_source <- pop(source)
+  list(source = new_source, target = new_target)
+}
+```
+
+
+```{r}
+move(c("a","b"), c("c","d"))
+```
+
+```{r}
+move_n <- function(n, source, target) {
+  stopifnot(n >= 1)
+  
+  new_source <- source
+  new_target <- target
+  
+  for (i in 1:n) {
+    res_pair   <- move(new_source, new_target)
+    new_source <- res_pair$source
+    new_target <- res_pair$target
+  }
+  
+  list(source = new_source, target = new_target)  
+}
+```
+
+
+```{r}
+move_n(3, c("a","b","c"), c("d"))
+```
+
+```{r}
+test_state <- list(c("a", "c", "d"), c(), "z", c())
+test_state
+```
+
+
+```{r}
+trans_state <- function(start, n, from_i, to_i) {
+  res <- move_n(n, start[[from_i]], start[[to_i]])
+  end <- start
+  end[[from_i]] <- res$source
+  end[[to_i]]   <- res$target
+  end
+}
+```
+
+
+```{r}
+trans_state(test_state, 3, 1, 2)
+```
+
+
+```{r}
+trans_states <- function(start, ns, from_is, to_is) {
+  stopifnot(length(ns) == length(from_is))
+  stopifnot(length(from_is) == length(to_is))
+  
+  state <- start
+  
+  for (i in 1:length(ns)) {
+    state <- trans_state(state, ns[i], from_is[i], to_is[i])
+  }
+  
+  state
+}
+```
+
+
+```{r}
+test_state
+```
+
+
+```{r}
+trans_states(test_state, c(2,1), c(1,2), c(2,4))
+```
+
+# Part 1: glued together
+
+```{r}
+the_answer <- trans_states(puzzle_state,
+                           moves$n,
+                           moves$from,
+                           moves$to)
+the_answer
+```
+
+```{r}
+length(the_answer)
+```
+
+```{r}
+print_tops <- function(ss) {
+  res <- rep(NA, length(ss))
+  
+  for (i in 1:length(ss)) {
+    res[i] <- top(ss[[i]])
+  }
+  
+  res
+}
+```
+
+```{r}
+print_tops(the_answer) |> paste(collapse = "")
+```
+YES!
+
+
+# Part 2
+
+Okay, I'm going to do something unforgivably hacky -- some surgery on `move_n`.
+
+```{r}
+rev_tail <- function(x, n) {
+  the_head <- head(x, length(x) - n)
+  the_tail <- tail(x, n)
+  c(the_head, rev(the_tail))
+}
+```
+
+```{r}
+move_n_9001 <- function(n, source, target) {
+  stopifnot(n >= 1)
+  
+  new_source <- source
+  new_target <- target
+  
+  for (i in 1:n) {
+    res_pair   <- move(new_source, new_target)
+    new_source <- res_pair$source
+    new_target <- res_pair$target
+  }
+  
+  list(source = new_source, target = rev_tail(new_target, n))  
+}
+```
+
+```{r}
+move_n <- move_n_9001
+```
+
+
+```{r}
+the_answer_9001 <- trans_states(puzzle_state,
+                                moves$n,
+                                moves$from,
+                                moves$to)
+the_answer_9001 |> print_tops() |> paste(collapse = "")
+```
+
+Phew - it worked.
+
+
