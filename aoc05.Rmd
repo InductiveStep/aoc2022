@@ -45,7 +45,7 @@ moves_raw |> head(5)
 ```{r}
 moves <- moves_raw |>
   str_split_fixed(" ", 6) |>
-  as_tibble(.names_repair = "unique") |>
+  as.data.frame() |>
   select(V2, V4, V6) |>
   rename(
     n    = V2,
