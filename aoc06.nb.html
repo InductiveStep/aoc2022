@@ -1792,9 +1792,9 @@ display: none;
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyc3RfdW5pcXVlIDwtIGZ1bmN0aW9uKHgsIHNlcWxlbikge1xuICB4X24gPC0gbGVuZ3RoKHgpXG4gIGZvdW5kIDwtIEZBTFNFXG4gIHN0YXJ0IDwtIDFcbiAgZW5kICAgPC0gc3RhcnQgKyBzZXFsZW4gLSAxXG4gIFxuICB3aGlsZShlbmQgPD0geF9uICYmICFmb3VuZCkge1xuICAgIHN1YnNlcSA8LSB4W3N0YXJ0OmVuZF1cbiAgICBpZiAoYWxsX3VuaXF1ZShzdWJzZXEpKSB7XG4gICAgICBmb3VuZCA8LSBUUlVFXG4gICAgfVxuICAgIGVsc2Uge1xuICAgICAgc3RhcnQgPC0gc3RhcnQgKyAxXG4gICAgICBlbmQgICA8LSBzdGFydCArIHNlcWxlbiAtIDFcbiAgICB9XG4gIH1cbiAgXG4gIGlmIChmb3VuZClcbiAgICBzdGFydFxuICBlbHNlXG4gICAgTkFcbn1cbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyc3RfdW5pcXVlIDwtIGZ1bmN0aW9uKHgsIHNlcWxlbikge1xuICB4X24gICA8LSBsZW5ndGgoeClcbiAgZm91bmQgPC0gRkFMU0VcbiAgc3RhcnQgPC0gMVxuICBlbmQgICA8LSBzdGFydCArIHNlcWxlbiAtIDFcbiAgXG4gIHdoaWxlKGVuZCA8PSB4X24gJiYgIWZvdW5kKSB7XG4gICAgc3Vic2VxIDwtIHhbc3RhcnQ6ZW5kXVxuICAgIGlmIChhbGxfdW5pcXVlKHN1YnNlcSkpIHtcbiAgICAgIGZvdW5kIDwtIFRSVUVcbiAgICB9XG4gICAgZWxzZSB7XG4gICAgICBzdGFydCA8LSBzdGFydCArIDFcbiAgICAgIGVuZCAgIDwtIHN0YXJ0ICsgc2VxbGVuIC0gMVxuICAgIH1cbiAgfVxuICBcbiAgaWYgKGZvdW5kKVxuICAgIHN0YXJ0XG4gIGVsc2VcbiAgICBOQVxufVxuYGBgIn0= -->
 <pre class="r"><code>first_unique &lt;- function(x, seqlen) {
-  x_n &lt;- length(x)
+  x_n   &lt;- length(x)
   found &lt;- FALSE
   start &lt;- 1
   end   &lt;- start + seqlen - 1
@@ -1918,9 +1918,52 @@ I’m going to keep it as is :)</p>
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>We’re done!</p>
+<div id="another-go" class="section level1">
+<h1>Another go</h1>
+<p>After finishing, I discovered the <code>zoo::rollapply</code>
+function <a href="https://fosstodon.org/@ashbaldry/109465486319687847">via
+Mastodon</a>, which would have significantly accelerated the
+solution.</p>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh6b28pXG5gYGAifQ== -->
+<pre class="r"><code>library(zoo)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyc3RfbWFya2VyXzIgPC0gZnVuY3Rpb24oeCwgbGVuKSB7XG4gIHdoaWNoKHJvbGxhcHBseSh4LCBsZW4sIGFsbF91bmlxdWUpKVsxXSArIGxlbiAtIDFcbn1cbmBgYCJ9 -->
+<pre class="r"><code>first_marker_2 &lt;- function(x, len) {
+  which(rollapply(x, len, all_unique))[1] + len - 1
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Part 1:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyc3RfbWFya2VyXzIodmVjLCA0KVxuYGBgIn0= -->
+<pre class="r"><code>first_marker_2(vec, 4)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDEwODBcbiJ9 -->
+<pre><code>[1] 1080</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Part 2:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmlyc3RfbWFya2VyXzIodmVjLCAxNClcbmBgYCJ9 -->
+<pre class="r"><code>first_marker_2(vec, 14)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDM2NDVcbiJ9 -->
+<pre><code>[1] 3645</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+</div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRheSA2OiBUdW5pbmcgVHJvdWJsZSINCmF1dGhvcjogIkBBbmRpQHRlY2gubGdidCINCm91dHB1dDogDQogIGh0bWxfbm90ZWJvb2s6IA0KICAgIGNvZGVfZm9sZGluZzogbm9uZQ0KLS0tDQoNCmBgYHtyIG1lc3NhZ2U9RkFMU0UsIHdhcm5pbmc9RkFMU0V9DQpsaWJyYXJ5KHRpZHl2ZXJzZSkNCmBgYA0KDQpgYGB7cn0NCmRhdCA8LSByZWFkX2xpbmVzKCJhb2MwNi50eHQiKQ0KYGBgDQoNCmBgYHtyfQ0Kc3RyMnZlYyA8LSBmdW5jdGlvbihzKSB7DQogIHN0cnNwbGl0KHMsIiIpW1sxXV0NCn0NCmBgYA0KDQpgYGB7cn0NCnZlYyA8LSBzdHIydmVjKGRhdCkNCmBgYA0KDQpgYGB7cn0NCmFsbF91bmlxdWUgPC0gZnVuY3Rpb24oeCkgew0KICAoeCB8PiB0YWJsZSgpIHw+IG1heCgpKSA9PSAxDQp9DQpgYGANCg0KYGBge3J9DQpmaXJzdF91bmlxdWUgPC0gZnVuY3Rpb24oeCwgc2VxbGVuKSB7DQogIHhfbiA8LSBsZW5ndGgoeCkNCiAgZm91bmQgPC0gRkFMU0UNCiAgc3RhcnQgPC0gMQ0KICBlbmQgICA8LSBzdGFydCArIHNlcWxlbiAtIDENCiAgDQogIHdoaWxlKGVuZCA8PSB4X24gJiYgIWZvdW5kKSB7DQogICAgc3Vic2VxIDwtIHhbc3RhcnQ6ZW5kXQ0KICAgIGlmIChhbGxfdW5pcXVlKHN1YnNlcSkpIHsNCiAgICAgIGZvdW5kIDwtIFRSVUUNCiAgICB9DQogICAgZWxzZSB7DQogICAgICBzdGFydCA8LSBzdGFydCArIDENCiAgICAgIGVuZCAgIDwtIHN0YXJ0ICsgc2VxbGVuIC0gMQ0KICAgIH0NCiAgfQ0KICANCiAgaWYgKGZvdW5kKQ0KICAgIHN0YXJ0DQogIGVsc2UNCiAgICBOQQ0KfQ0KYGBgDQoNClRlc3Q6DQoNCmBgYHtyfQ0KZmlyc3RfdW5pcXVlKGMoMSwyLDMsNCksIDQpDQpmaXJzdF91bmlxdWUoYygxLDEsMyw0KSwgNCkNCmZpcnN0X3VuaXF1ZShjKDEsMSwzLDQsNSksIDQpDQpgYGANCg0KV29ya3MhDQoNClRoZSBuZXh0IGZ1bmN0aW9uIGlzIGJlY2F1c2UgSSBtaXNyZWFkIHRoZSBxdWVzdGlvbiBhbmQgcmV0dXJuIHRoZSBzdGFydCByYXRoZXIgdGhhbiBlbmQgcG9zaXRpb24sIGJ1dCBJIGxpa2UgYGZpcnN0X3VuaXF1ZWAgc28gSSdtIGdvaW5nIHRvIGtlZXAgaXQgYXMgaXMgOikNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIgPC0gZnVuY3Rpb24oeCwgbGVuKQ0KICBmaXJzdF91bmlxdWUoeCwgbGVuKSArIGxlbiAtIDENCmBgYA0KDQoNClRoZXNlIGFsbCB3b3JrOg0KDQpgYGB7cn0NCmZpcnN0X21hcmtlcigiYnZ3YmpwbGJndmJoc3JscGdkbWpxd2Z0dm5jeiIgfD4gc3RyMnZlYygpLCA0KQ0KYGBgDQoNCmBgYHtyfQ0KZmlyc3RfbWFya2VyKCJucHBkdmp0aHFsZHB3bmNxc3p2ZnRicm1qbGhnIiB8PiBzdHIydmVjKCksIDQpDQpgYGANCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIoIm56bnJuZnJmbnRqZm12ZndtemRmamx2dHFuYmhjcHJzZyIgfD4gc3RyMnZlYygpLCA0KQ0KYGBgDQoNClNvLCB0aGUgYW5zd2VyIHRvIFBhcnQgMSBpczoNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIodmVjLCA0KQ0KYGBgDQoNClBhcnQgMjoNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIoIm5wcGR2anRocWxkcHduY3FzenZmdGJybWpsaGciIHw+IHN0cjJ2ZWMoKSwgMTQpDQpgYGANCldvcmtzIC0gc28gUGFydCAyIGlzOg0KDQpgYGB7cn0NCmZpcnN0X21hcmtlcih2ZWMsIDE0KQ0KYGBgDQoNCldlJ3JlIGRvbmUhDQoNCg0KDQoNCg0KDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkRheSA2OiBUdW5pbmcgVHJvdWJsZSINCmF1dGhvcjogIkBBbmRpQHRlY2gubGdidCINCm91dHB1dDogDQogIGh0bWxfbm90ZWJvb2s6IA0KICAgIGNvZGVfZm9sZGluZzogbm9uZQ0KLS0tDQoNCg0KYGBge3IgbWVzc2FnZT1GQUxTRSwgd2FybmluZz1GQUxTRX0NCmxpYnJhcnkodGlkeXZlcnNlKQ0KYGBgDQoNCmBgYHtyfQ0KZGF0IDwtIHJlYWRfbGluZXMoImFvYzA2LnR4dCIpDQpgYGANCg0KYGBge3J9DQpzdHIydmVjIDwtIGZ1bmN0aW9uKHMpIHsNCiAgc3Ryc3BsaXQocywiIilbWzFdXQ0KfQ0KYGBgDQoNCmBgYHtyfQ0KdmVjIDwtIHN0cjJ2ZWMoZGF0KQ0KYGBgDQoNCmBgYHtyfQ0KYWxsX3VuaXF1ZSA8LSBmdW5jdGlvbih4KSB7DQogICh4IHw+IHRhYmxlKCkgfD4gbWF4KCkpID09IDENCn0NCmBgYA0KDQpgYGB7cn0NCmZpcnN0X3VuaXF1ZSA8LSBmdW5jdGlvbih4LCBzZXFsZW4pIHsNCiAgeF9uICAgPC0gbGVuZ3RoKHgpDQogIGZvdW5kIDwtIEZBTFNFDQogIHN0YXJ0IDwtIDENCiAgZW5kICAgPC0gc3RhcnQgKyBzZXFsZW4gLSAxDQogIA0KICB3aGlsZShlbmQgPD0geF9uICYmICFmb3VuZCkgew0KICAgIHN1YnNlcSA8LSB4W3N0YXJ0OmVuZF0NCiAgICBpZiAoYWxsX3VuaXF1ZShzdWJzZXEpKSB7DQogICAgICBmb3VuZCA8LSBUUlVFDQogICAgfQ0KICAgIGVsc2Ugew0KICAgICAgc3RhcnQgPC0gc3RhcnQgKyAxDQogICAgICBlbmQgICA8LSBzdGFydCArIHNlcWxlbiAtIDENCiAgICB9DQogIH0NCiAgDQogIGlmIChmb3VuZCkNCiAgICBzdGFydA0KICBlbHNlDQogICAgTkENCn0NCmBgYA0KDQpUZXN0Og0KDQpgYGB7cn0NCmZpcnN0X3VuaXF1ZShjKDEsMiwzLDQpLCA0KQ0KZmlyc3RfdW5pcXVlKGMoMSwxLDMsNCksIDQpDQpmaXJzdF91bmlxdWUoYygxLDEsMyw0LDUpLCA0KQ0KYGBgDQoNCldvcmtzIQ0KDQpUaGUgbmV4dCBmdW5jdGlvbiBpcyBiZWNhdXNlIEkgbWlzcmVhZCB0aGUgcXVlc3Rpb24gYW5kIHJldHVybiB0aGUgc3RhcnQgcmF0aGVyIHRoYW4gZW5kIHBvc2l0aW9uLCBidXQgSSBsaWtlIGBmaXJzdF91bmlxdWVgIHNvIEknbSBnb2luZyB0byBrZWVwIGl0IGFzIGlzIDopDQoNCmBgYHtyfQ0KZmlyc3RfbWFya2VyIDwtIGZ1bmN0aW9uKHgsIGxlbikNCiAgZmlyc3RfdW5pcXVlKHgsIGxlbikgKyBsZW4gLSAxDQpgYGANCg0KDQpUaGVzZSBhbGwgd29yazoNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIoImJ2d2JqcGxiZ3ZiaHNybHBnZG1qcXdmdHZuY3oiIHw+IHN0cjJ2ZWMoKSwgNCkNCmBgYA0KDQpgYGB7cn0NCmZpcnN0X21hcmtlcigibnBwZHZqdGhxbGRwd25jcXN6dmZ0YnJtamxoZyIgfD4gc3RyMnZlYygpLCA0KQ0KYGBgDQoNCmBgYHtyfQ0KZmlyc3RfbWFya2VyKCJuem5ybmZyZm50amZtdmZ3bXpkZmpsdnRxbmJoY3Byc2ciIHw+IHN0cjJ2ZWMoKSwgNCkNCmBgYA0KDQpTbywgdGhlIGFuc3dlciB0byBQYXJ0IDEgaXM6DQoNCmBgYHtyfQ0KZmlyc3RfbWFya2VyKHZlYywgNCkNCmBgYA0KDQpQYXJ0IDI6DQoNCmBgYHtyfQ0KZmlyc3RfbWFya2VyKCJucHBkdmp0aHFsZHB3bmNxc3p2ZnRicm1qbGhnIiB8PiBzdHIydmVjKCksIDE0KQ0KYGBgDQpXb3JrcyAtIHNvIFBhcnQgMiBpczoNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXIodmVjLCAxNCkNCmBgYA0KDQpXZSdyZSBkb25lIQ0KDQoNCiMgQW5vdGhlciBnbw0KDQpBZnRlciBmaW5pc2hpbmcsIEkgZGlzY292ZXJlZCB0aGUgYHpvbzo6cm9sbGFwcGx5YCBmdW5jdGlvbiBbdmlhIE1hc3RvZG9uXShodHRwczovL2Zvc3N0b2Rvbi5vcmcvQGFzaGJhbGRyeS8xMDk0NjU0ODYzMTk2ODc4NDcpLCB3aGljaCB3b3VsZCBoYXZlIHNpZ25pZmljYW50bHkgYWNjZWxlcmF0ZWQgdGhlIHNvbHV0aW9uLg0KDQpgYGB7ciBtZXNzYWdlPUZBTFNFLCB3YXJuaW5nPUZBTFNFfQ0KbGlicmFyeSh6b28pDQpgYGANCg0KYGBge3J9DQpmaXJzdF9tYXJrZXJfMiA8LSBmdW5jdGlvbih4LCBsZW4pIHsNCiAgd2hpY2gocm9sbGFwcGx5KHgsIGxlbiwgYWxsX3VuaXF1ZSkpWzFdICsgbGVuIC0gMQ0KfQ0KYGBgDQoNClBhcnQgMToNCg0KYGBge3J9DQpmaXJzdF9tYXJrZXJfMih2ZWMsIDQpDQpgYGANCg0KUGFydCAyOg0KDQpgYGB7cn0NCmZpcnN0X21hcmtlcl8yKHZlYywgMTQpDQpgYGANCg==</div>
 
 
 

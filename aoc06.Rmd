@@ -6,6 +6,7 @@ output:
     code_folding: none
 ---
 
+
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 ```
@@ -32,7 +33,7 @@ all_unique <- function(x) {
 
 ```{r}
 first_unique <- function(x, seqlen) {
-  x_n <- length(x)
+  x_n   <- length(x)
   found <- FALSE
   start <- 1
   end   <- start + seqlen - 1
@@ -107,7 +108,28 @@ first_marker(vec, 14)
 We're done!
 
 
+# Another go
 
+After finishing, I discovered the `zoo::rollapply` function [via Mastodon](https://fosstodon.org/@ashbaldry/109465486319687847), which would have significantly accelerated the solution.
 
+```{r message=FALSE, warning=FALSE}
+library(zoo)
+```
 
+```{r}
+first_marker_2 <- function(x, len) {
+  which(rollapply(x, len, all_unique))[1] + len - 1
+}
+```
 
+Part 1:
+
+```{r}
+first_marker_2(vec, 4)
+```
+
+Part 2:
+
+```{r}
+first_marker_2(vec, 14)
+```
