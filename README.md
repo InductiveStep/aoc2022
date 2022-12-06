@@ -13,3 +13,5 @@ Solutions:
 [Day 4: Camp Cleanup](https://inductivestep.github.io/aoc2022/aoc04.nb.html)
 
 [Day 5: Supply Stacks](https://inductivestep.github.io/aoc2022/aoc05.nb.html)
+
+[Day 6: Tuning Trouble](https://inductivestep.github.io/aoc2022/aoc06.nb.html)
