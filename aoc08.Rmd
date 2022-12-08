@@ -1,0 +1,132 @@
+---
+title: "Day 8: Treetop Tree House"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+dat <- read.table("aoc08.txt", colClasses = "character")
+```
+
+
+```{r}
+dims <- dat[1,] |> str_length()
+stopifnot(dims == nrow(dat))
+dims
+```
+
+```{r}
+trees <- str_split_fixed(dat$V1, "", dims)
+str(trees)
+```
+
+The following function takes a column or a row (it doesn't mind) and tree position, and answers whether the tree at that position is visible to the left/right or top/bottom.
+
+```{r}
+is_vis <- function(col, i) {
+  col <- as.numeric(col)
+  max_left  <- max(col[1:(i - 1)])
+  max_right <- max(col[(i+1):length(col)])
+  (col[i] > max_left) || (col[i] > max_right)
+}
+```
+
+`vis_edges` then uses it across all cells. We get the outer cell answers for free, as per the first line below:
+
+```{r}
+vis_edges <- function(mat) {
+  vis <- nrow(mat) * 2 + (ncol(mat) - 2) * 2
+
+  for (r in 2:(nrow(mat) - 1))
+    for (c in 2:(ncol(mat) - 1)) {
+      vis_row <- is_vis(mat[r,], c)
+      vis_col <- is_vis(mat[,c], r)
+      
+      if (vis_row || vis_col)
+        vis <- vis + 1
+    }
+  
+  vis
+}
+```
+
+Part 1:
+
+```{r}
+vis_edges(trees)
+```
+It worked (second time -- made an error indexing rows/cols which wasn't picked up on the example).
+
+
+Part 2:
+
+This function solves it in one direction from a particular tree height.
+
+```{r}
+halfcol <- function(col, height) {
+  views <- 0
+  i <- 1
+  blocked <- FALSE
+  
+  while (i <= length(col) && !blocked) {
+    views <- views + 1
+    if (col[i] < height)
+      i <- i + 1
+    else
+      blocked <- TRUE
+  }
+
+  views
+}
+```
+
+The following function solves it for a particular row/column:
+
+```{r}
+scol <- function(col, i) {
+  col <- as.numeric(col)
+  
+  left_res  <- halfcol(rev(col[1:(i-1)]), col[i])
+  right_res <- halfcol(col[(i+1):length(col)], col[i])
+  
+  left_res * right_res
+}
+```
+
+Finally, glue it altogether. Edges are zero, hence initialising the matrix result, res, with zeros.
+
+```{r}
+scenic_scores <- function(mat) {
+  res <- matrix(0,
+                ncol = ncol(mat),
+                nrow = nrow(mat))
+
+  for (r in 2:(nrow(mat) - 1))
+    for (c in 2:(ncol(mat) - 1))
+      res[r,c] <- scol(mat[r,], c) *
+                  scol(mat[,c], r)
+  
+  res
+}
+```
+
+
+```{r}
+scores <- scenic_scores(trees)
+```
+
+
+```{r}
+max(scores)
+```
+
+Done.
+
+
+

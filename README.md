@@ -15,3 +15,10 @@ Solutions:
 [Day 5: Supply Stacks](https://inductivestep.github.io/aoc2022/aoc05.nb.html)
 
 [Day 6: Tuning Trouble](https://inductivestep.github.io/aoc2022/aoc06.nb.html)
+
+[Day 7: No Space Left On Device](https://inductivestep.github.io/aoc2022/aoc07.nb.html)
+
+[Day 8: Treetop Tree House](https://inductivestep.github.io/aoc2022/aoc08.nb.html)
+
+
+

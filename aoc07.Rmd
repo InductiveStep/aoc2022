@@ -1,0 +1,167 @@
+---
+title: "Day 7: No Space Left On Device"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+cmds <- read_lines("aoc07.txt")
+str(cmds)
+```
+
+```{r}
+dat <- tibble(
+  cmds = cmds
+)
+```
+
+```{r}
+split_space <- function(s) {
+  strsplit(s, split = " ")[[1]]
+}
+```
+
+I'm starting by getting the absolute paths at each point in the command/output stream:
+
+```{r}
+get_abs_path <- function(mess) {
+  res <- rep(NA, length(mess))
+  where_am_i <- NA
+  
+  for (i in seq_along(mess)) {
+    if (mess[i] |> str_starts("\\$ cd")) {
+      dir <- split_space(mess[i])[3]
+      if (dir == "/") {
+        where_am_i <- c()
+      }
+      else if (dir == "..") {
+        stopifnot(!any(is.na(where_am_i)) &&
+                    (length(where_am_i) > 0))
+        where_am_i <-
+          head(where_am_i,
+               length(where_am_i) - 1)
+      }
+      else {
+        stopifnot(!any(is.na(where_am_i)))
+        where_am_i <- c(where_am_i, dir)
+      }
+    }
+    res[i] <- paste0("/", paste(where_am_i, collapse = "/"))
+  }
+  
+  res
+}
+```
+
+
+```{r}
+dat$path <- get_abs_path(dat$cmds)
+```
+
+Next, the filesizes - any output beginning with a number.
+
+```{r}
+get_filesize <- function(mess) {
+  res <- rep(NA, length(mess))
+
+  for (i in seq_along(mess)) {
+    if (mess[i] |> str_starts("\\d")) {  
+       res[i] <- split_space(mess[i])[1] |> as.numeric()
+    }
+  }
+  
+  res
+}
+```
+
+```{r}
+dat$size <- get_filesize(dat$cmds)
+```
+
+```{r}
+dat$size |> na.omit() |> sum()
+```
+Now we just do some sums.
+
+```{r}
+dat_size <- dat |>
+  group_by(path) |>
+  summarise(sum_size = sum(size, na.rm = TRUE))
+dat_size
+```
+
+```{r}
+sum(dat_size$sum_size)
+```
+
+Totals are easy to find by summing folder sizes for all absolute paths that start with the current path.
+
+```{r}
+get_total_sizes <- function(totsdat) {
+  res <- rep(NA, nrow(totsdat))
+
+  for (i in seq_along(totsdat$sum_size)) {
+    matches <- totsdat |>
+      filter(str_starts(path, path[i]))
+    res[i] <- sum(matches$sum_size)
+  }
+  
+  res 
+}
+```
+
+```{r}
+dat_size$total_size <- get_total_sizes(dat_size)
+```
+
+```{r}
+dat_size |>
+  select(path, sum_size, total_size)
+```
+
+```{r}
+most100000 <- dat_size |>
+  filter(total_size <= 100000)
+most100000 
+```
+
+
+Part 1:
+
+```{r}
+most100000$total_size |> sum()
+```
+
+
+Part 2:
+
+```{r}
+total_space <- sum(dat_size$sum_size)
+total_space
+```
+
+"The total disk space available to the filesystem is 70000000. To run the update, you need unused space of at least 30000000."
+
+```{r}
+dat_size$left_if_delete <- 70000000 - total_space + dat_size$total_size
+```
+
+```{r}
+delete_em <- dat_size |>
+  filter(left_if_delete >= 30000000) |>
+  arrange(left_if_delete)
+delete_em
+```
+
+So, the answer is:
+
+```{r}
+(delete_em |> pull(total_size))[1]
+```
+
