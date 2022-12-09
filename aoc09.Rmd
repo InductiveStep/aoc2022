@@ -1,0 +1,225 @@
+---
+title: "Day 9: Rope Bridge"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+dat <- read.table("aoc09.txt", sep = " ") |>
+  rename(dir = V1, n = V2)
+dat |> head()
+```
+
+
+I reckon it will be handier if each move is one step, so let's expand the move list...
+
+```{r}
+expand_moves <- function(dir, n) {
+  rep(dir, n)
+}
+```
+
+(That didn't really need a function, did it? I'd forgotten that `rep` takes vectors. Onwards.)
+
+```{r}
+moves <- tibble(d = expand_moves(dat$dir, dat$n))
+moves |> head()
+```
+
+
+It will also be handy to tell if H and T are touching. Voila:
+
+```{r}
+touching <- function(p1_x, p1_y, p2_x, p2_y) {
+  p1 <- c(p1_x, p1_y)
+  p2 <- c(p2_x, p2_y) 
+  dist(rbind(p1, p2),
+            method = "euclidean") < 2
+}
+```
+
+(Why 2? It's probably closer to $\sqrt{2}$, but 2 works fine.)
+
+Examples where they touch:
+
+```{r}
+touching( 0, 0,  0,0)
+touching( 1, 0,  0,0)
+touching(-1, 0,  0,0)
+touching( 0, 1,  0,0)
+touching( 0,-1,  0,0)
+touching( 1, 1,  0,0)
+touching(-1, 1,  0,0)
+touching( 1, 1,  0,0)
+touching( 1,-1,  0,0)
+```
+
+Examples where they don't:
+
+```{r}
+touching( 2, 0,  0,0)
+touching(-2, 0,  0,0)
+touching( 0, 2,  0,0)
+touching( 0,-2,  0,0)
+```
+
+
+This is surely hidden in R somewhere already:
+
+```{r}
+bound <- function(x, abs_max) {
+  bound_up   <- ifelse(x > abs_max, 
+                       abs_max,
+                       x)
+  bound_down <- ifelse(bound_up < -abs_max,
+                       -abs_max,
+                       bound_up)
+  bound_down
+}
+```
+
+```{r}
+bound(3, 2)
+bound(-3, 2)
+```
+
+
+The main function. Note the secret ingredient commented therein.
+
+```{r}
+move <- function(start_x, start_y, ms) {
+  res <- ms |>
+    mutate(h_x = NA,
+           h_y = NA,
+           t_x = NA,
+           t_y = NA)
+  
+  h_x <- start_x
+  h_y <- start_y
+  t_x <- start_x
+  t_y <- start_y
+  
+  for (i in seq_along(res$d)) {
+    # Move H
+    if (res$d[i] == "U")
+      h_y <- h_y + 1
+    else if (res$d[i] == "D")
+      h_y <- h_y - 1
+    else if (res$d[i] == "L")
+      h_x <- h_x - 1
+    else if (res$d[i] == "R")
+      h_x <- h_x + 1
+    else
+      stop("Don't know that direction")
+    
+    # secret ingredient
+    if (!touching(h_x, h_y, t_x, t_y)) {
+      delta_x <- (h_x - t_x) |> bound(1)
+      delta_y <- (h_y - t_y) |> bound(1)
+      t_x <- t_x + delta_x
+      t_y <- t_y + delta_y
+    }
+    
+    # Update table
+    res$h_x[i] <- h_x
+    res$h_y[i] <- h_y
+    res$t_x[i] <- t_x
+    res$t_y[i] <- t_y
+  }
+  
+  res
+}
+```
+
+
+```{r}
+moved <- move(0, 0, moves)
+```
+
+
+```{r}
+moved |> head()
+```
+
+## Part 1:
+
+How many places has T been?
+
+```{r}
+paste(moved$t_x, moved$t_y) |>
+  unique() |>
+  length()
+```
+
+Correct!
+
+## Part 2:
+
+Okay, now I wish I'd guessed this was coming. I'm just going to hike out the secret ingredient and do it *n* times, treating the previous knot's moves as a head.
+
+```{r}
+follow_n <- function(m, n) {
+  res <- m
+  stopifnot(n >= 1)
+  
+  for (k in 1:n) {
+    h <- res |> select(ncol(res) - 1, ncol(res))
+    names(h) <- c("x", "y")
+    h$t_x <- NA
+    h$t_y <- NA
+    
+    t_x <- 0
+    t_y <- 0
+    
+    for (i in 1:nrow(h)) {
+      h_x <- h$x[i]
+      h_y <- h$y[i]
+      
+      if (!touching(h_x, h_y, t_x, t_y)) {
+        delta_x <- (h_x - t_x) |> bound(1)
+        delta_y <- (h_y - t_y) |> bound(1)
+        t_x <- t_x + delta_x
+        t_y <- t_y + delta_y
+      }
+
+      h$t_x[i] <- t_x
+      h$t_y[i] <- t_y
+    }
+    
+    prefix <- paste0("t",k,"_")
+    names(h)[3:4] <- c(paste0(prefix,"x"),
+                       paste0(prefix,"y"))
+    
+    res <- cbind(res, h[,3:4])
+  }
+  
+  res
+}
+```
+
+```{r}
+moved2 <- moved |> select(d, h_x, h_y)
+moved2 <- follow_n(moved2, 9)
+```
+
+
+```{r}
+names(moved2)
+```
+
+
+How many places has the 9th knot been?
+
+```{r}
+paste(moved2$t9_x, moved2$t9_y) |>
+  unique() |>
+  length()
+```
+
+It worked!

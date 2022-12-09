@@ -20,5 +20,6 @@ Solutions:
 
 [Day 8: Treetop Tree House](https://inductivestep.github.io/aoc2022/aoc08.nb.html)
 
+[Day 9: Rope Bridge](https://inductivestep.github.io/aoc2022/aoc09.nb.html)
 
 
