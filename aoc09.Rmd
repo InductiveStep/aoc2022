@@ -40,7 +40,7 @@ touching <- function(p1_x, p1_y, p2_x, p2_y) {
   p1 <- c(p1_x, p1_y)
   p2 <- c(p2_x, p2_y) 
   dist(rbind(p1, p2),
-            method = "euclidean") < 2
+       method = "euclidean") < 2
 }
 ```
 
