@@ -50,14 +50,8 @@ Examples where they touch:
 
 ```{r}
 touching( 0, 0,  0,0)
-touching( 1, 0,  0,0)
-touching(-1, 0,  0,0)
-touching( 0, 1,  0,0)
-touching( 0,-1,  0,0)
 touching( 1, 1,  0,0)
 touching(-1, 1,  0,0)
-touching( 1, 1,  0,0)
-touching( 1,-1,  0,0)
 ```
 
 Examples where they don't:
