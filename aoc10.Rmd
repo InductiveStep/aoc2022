@@ -81,6 +81,7 @@ draw <- rbind(
 draw
 ```
 
+I originally tried `col %in% (X-1):(X+1)`, but that got confused.
 
 ```{r}
 lets <- draw |>
@@ -89,4 +90,6 @@ lets <- draw |>
 cat(paste(lets$s, collapse = "\n"))
 ```
 
-Surprised that worked LEL.
+Answer: PAPJCBHP.
+
+I'm surprised that worked :)
