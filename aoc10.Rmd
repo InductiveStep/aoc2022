@@ -1,0 +1,92 @@
+---
+title: "Day 10: Cathode-Ray Tube"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+cmds <- read_lines("aoc10.txt")
+str(cmds)
+```
+
+I'm going to generate a stream of values of the *X* register *after* each cycle.
+
+```{r}
+Xs <- function(startX, ops) {
+  res <- c()
+  
+  X <- startX
+  for (i in seq_along(ops)) {
+    if (ops[i] == "noop") {
+      slice <- X
+    }
+    else {
+      operand <- strsplit(ops[i], split = " ")[[1]][2] |>
+                 as.numeric()
+      slice <- c(X, X + operand)
+      X <- X + operand
+    }
+    names(slice) = rep(ops[i], length(slice))
+    res <- c(res, slice)
+  }
+  res
+}
+```
+
+To get the value *during* a cycle, just shift the cycle index by one:
+
+```{r}
+res <- Xs(1, cmds)
+dat <- tibble(op = names(res),
+              X = res) |>
+  mutate(
+    after_cycle  = 1:n(),
+    during_cycle = 2:(n() + 1),
+    signal = during_cycle * X
+  )
+```
+
+```{r}
+dat
+```
+
+
+## Part 1:
+
+```{r}
+dat |> filter(during_cycle %in% seq(20, 220, 40)) |>
+  pull(signal) |>
+  sum()
+```
+Correct.
+
+## Part 2:
+
+```{r}
+draw <- rbind(
+          tibble(X = 1, during_cycle = 1),
+          dat |> select(X, during_cycle)
+        ) |>
+        mutate(
+          col = (during_cycle - 1) %% 40,
+          row = sort(rep(0:(ceiling(n() / 40)), 40))[1:n()],
+          pix = ifelse(col == X | col == X-1 | col == X+1, "#", ".")
+        )
+draw
+```
+
+
+```{r}
+lets <- draw |>
+  group_by(row) |>
+  summarise(s = paste(pix, collapse = ""))
+cat(paste(lets$s, collapse = "\n"))
+```
+
+Surprised that worked LEL.

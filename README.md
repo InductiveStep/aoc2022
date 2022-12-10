@@ -22,4 +22,4 @@ Solutions:
 
 [Day 9: Rope Bridge](https://inductivestep.github.io/aoc2022/aoc09.nb.html)
 
-
+[Day 10: Cathode-Ray Tube](https://inductivestep.github.io/aoc2022/aoc10.nb.html)
