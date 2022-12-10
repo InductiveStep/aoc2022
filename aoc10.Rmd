@@ -47,7 +47,7 @@ dat <- tibble(op = names(res),
               X = res) |>
   mutate(
     after_cycle  = 1:n(),
-    during_cycle = 2:(n() + 1),
+    during_cycle = after_cycle + 1,
     signal = during_cycle * X
   )
 ```
@@ -73,6 +73,7 @@ draw <- rbind(
           tibble(X = 1, during_cycle = 1),
           dat |> select(X, during_cycle)
         ) |>
+        slice(-n()) |> # tidy up 
         mutate(
           col = (during_cycle - 1) %% 40,
           row = sort(rep(0:(ceiling(n() / 40)), 40))[1:n()],
