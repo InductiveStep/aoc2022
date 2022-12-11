@@ -1,0 +1,180 @@
+---
+title: "Day 11: Monkey in the Middle"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+monkey_mess <- read_lines("aoc11.txt")
+str(monkey_mess)
+```
+
+```{r}
+head(monkey_mess,10)
+```
+
+What a mess, `monkey_mess`.
+
+```{r}
+less_mess <- tibble(raw = monkey_mess) |>
+  filter(raw != "") |>
+  mutate(m = sort(rep(0:((n()/6) - 1), n()/(n()/6)))) |> # LOL
+  filter(!str_starts(raw, "Monkey")) |>
+  mutate(name = rep(c("items", "op", "test", "true", "false"), n()/5),
+         rawish = str_split_fixed(raw, ": ", 2)[,2]) |>
+  pivot_wider(id_cols = m, names_from = name, values_from = rawish)
+less_mess
+```
+
+```{r}
+lop_off <- function(s, l) {
+  str_split_fixed(s, l, 2)[,2]
+}
+```
+
+```{r}
+mm <- less_mess |>
+  mutate(op    = lop_off(op, "new = "),
+         test  = lop_off(test, "divisible by ") |> as.numeric(),
+         true  = lop_off(true, "throw to monkey "),
+         false = lop_off(false, "throw to monkey "))
+mm
+```
+
+That's better.
+
+We can also get the `eval` function out of the way:
+
+```{r}
+eval_op <- function(old, str) {
+  eval(parse(text = str))
+}
+
+eval_op(6, "old * 7")
+```
+Thankfully R's `eval` and `parse` functions mean I don't need to write a parser.
+
+So, roughly speaking, I want to represent the monkeys' states as a list of lists. I'll write a function that transforms the states for one round and then iterate that as many times as required.
+
+
+```{r}
+ms <- mapply(\(x) strsplit(x, ", "), mm$items) |>
+      lapply(as.numeric)
+names(ms) <- mm$m
+ms
+```
+
+
+This function is horrible. I initially wrote and tested it for one round, and then just wrapped it in a big ol' for-loop for *n*. No regrets.
+
+```{r}
+monkey_round <- function(start, n) {
+  state   <- start
+  inspect <- rep(0, length(ms)) |> as.list()
+  names(inspect) <- names(state)
+
+  for (j in 1:n) {
+    for (this_monkey in mm$m) {
+      cur_row <- mm |> filter(this_monkey == m)
+      m_char <- as.character(this_monkey)
+      
+      for (i in state[[m_char]]) {
+        state[[m_char]] <- tail(state[[m_char]],
+                                length(state[[m_char]]) - 1)
+        i <- eval_op(i, cur_row$op)
+        i <- floor(i/3)
+        
+        if (i %% cur_row$test == 0) {
+          state[[cur_row$true]] <- c(state[[cur_row$true]], i)
+        }
+        else {
+          state[[cur_row$false]] <- c(state[[cur_row$false]], i)
+        }
+        
+        inspect[[m_char]] <- inspect[[m_char]] + 1
+      }
+    }
+  }
+  
+  list(state = state, inspect = inspect)
+}
+```
+
+
+
+## Part 1:
+
+```{r}
+res <- monkey_round(ms, 20)
+res
+```
+
+
+```{r}
+inspections <- sapply(res$inspect, first) |> sort(decreasing = T)
+inspections[1] * inspections[2]
+```
+
+
+
+## Part 2:
+
+The numbers get big, very big. I'd spotted the prime mods and realised that was significant, but needed the explanation [on Reddit](https://www.reddit.com/r/adventofcode/comments/zihouc/comment/izrimjo/?utm_source=share&utm_medium=web2x&context=3).
+
+
+
+```{r}
+the_mod <- prod(mm$test) # Thanks Reddit!
+the_mod
+```
+
+
+```{r}
+monkey_round_2 <- function(start, n) {
+  state   <- start
+  inspect <- rep(0, length(ms)) |> as.list()
+  names(inspect) <- names(state)
+
+  for (j in 1:n) {
+    for (this_monkey in mm$m) {
+      cur_row <- mm |> filter(this_monkey == m)
+      m_char <- as.character(this_monkey)
+      
+      for (i in state[[m_char]]) {
+        state[[m_char]] <- tail(state[[m_char]],
+                                length(state[[m_char]]) - 1)
+        i <- eval_op(i, cur_row$op) %% the_mod
+                                    # Thanks Reddit!
+        
+        if (i %% cur_row$test == 0) {
+          state[[cur_row$true]] <- c(state[[cur_row$true]], i)
+        }
+        else {
+          state[[cur_row$false]] <- c(state[[cur_row$false]], i)
+        }
+        
+        inspect[[m_char]] <- inspect[[m_char]] + 1
+      }
+    }
+  }
+  
+  list(state = state, inspect = inspect)
+}
+```
+
+
+
+```{r}
+res2 <- monkey_round_2(ms, 10000)
+inspections <- sapply(res2$inspect, first) |> sort(decreasing = T)
+inspections[1] * inspections[2]
+```
+
+
+
