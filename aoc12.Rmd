@@ -1,0 +1,321 @@
+---
+title: "Day 12: Hill Climbing Algorithm"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+Read in the map:
+
+```{r}
+load_map <- function(filename) {
+  rawdat <- read_lines(filename)
+  str_split_fixed(rawdat, "", rawdat[1] |> str_length())
+}
+```
+
+```{r}
+testdat <- load_map("aoc12test.txt")
+testdat
+```
+
+
+
+## Chancing my arm with a brute force recursive approach
+
+Guess what happened...?
+
+
+```{r}
+climbable <- Vectorize(function(here, there) {
+  if (is.na(here) || is.na(there))
+    FALSE
+  else {
+    here_n  <- which(letters == here)
+    there_n <- which(letters == there)
+    there_n - here_n <= 1
+  }
+})
+```
+
+
+```{r}
+neighbours <- function(mat, where) {
+  w.r  <- where[1]
+  w.c  <- where[2]
+  here <- mat[w.r, w.c]
+  
+  res <- data.frame(r = c(w.r,     w.r,     w.r - 1, w.r + 1),
+                    c = c(w.c - 1, w.c + 1, w.c,     w.c)) |>
+    filter(r >= 1 &
+           c >= 1 &
+           r <= nrow(mat) &
+           c <= ncol(mat)) |>
+    filter(!is.na(mat[cbind(r, c)])) |>
+    mutate(there = mat[cbind(r, c)])
+  
+  if (nrow(res) > 0)
+    res |> filter(climbable(here, there))
+  else
+    res
+}
+```
+
+
+```{r}
+find_path_worker <- function(start, end, mat) {
+  cur_mat <- mat
+  cur_mat[start] <- NA
+  res <- NA
+  
+  if (all(start == end)) {
+    res <- 0
+  }
+  else {
+    venture <- neighbours(mat, start)
+    
+    if (nrow(venture) == 0) {
+      res <- NA
+    }
+    else {
+      venture$dist <- mapply(\(r,c) find_path_worker(cbind(r,c),
+                                                     end,
+                                                     cur_mat),
+                             venture$r,
+                             venture$c) 
+      venture <- na.omit(venture)
+      if (nrow(venture) == 0)
+        res <- NA
+      else
+        res <- 1 + min(venture$dist)
+    }
+  }
+  
+  res
+}
+```
+
+
+```{r}
+find_path <- function(mat) {
+  S_is <- which(mat == "S", arr.ind = TRUE)
+  E_is <- which(mat == "E", arr.ind = TRUE)
+  
+  mat[S_is] <- "a"
+  mat[E_is] <- "z"
+  
+  find_path_worker(S_is, E_is, mat)
+}
+```
+
+
+It actually works for the test example, after a minute or two!
+
+```{r}
+find_path(testdat)
+```
+
+LOL. Not a hope on the full problem.
+
+
+## Time for a graph algorithm
+
+I hadn't used graph algorithms in R before. A Google for "graph shortest distance r" led to {igraph}. Fingers crossed.
+
+
+```{r message=FALSE, warning=FALSE}
+library(igraph)
+```
+
+
+I'm going to reuse `neighbours` to build the DAG. For node names I'll use the coordinates as a comma-separated string.
+
+
+```{r}
+prep_dat <- function(mat) {
+  S_is <- which(mat == "S", arr.ind = TRUE)
+  E_is <- which(mat == "E", arr.ind = TRUE)
+  
+  mat[S_is] <- "a"
+  mat[E_is] <- "z"
+  
+  list(input = mat, S = S_is, E = E_is)
+}
+```
+
+
+
+
+```{r}
+build_edges <- function(mat) {
+  res <- data.frame()
+  
+  for (r_here in 1:nrow(mat)) {
+    for (c_here in 1:ncol(mat)) {
+      to_dat <- neighbours(mat, c(r_here,c_here)) |>
+        mutate(from = paste(r_here, c_here, sep = ","),
+               to   = paste(r, c, sep = ",")) |>
+        select(from, to)
+      res <- rbind(res, to_dat)
+    }
+  }
+  res
+}
+```
+
+
+
+```{r}
+build_edges(prep_dat(testdat)$input)
+```
+
+
+
+```{r}
+edges_to_dag <- function(edges) {
+  graph.data.frame(d = edges, directed = TRUE)
+}
+```
+
+
+
+```{r}
+test_dag <- build_edges(prep_dat(testdat)$input) |>
+            edges_to_dag()
+```
+
+
+
+```{r}
+plot(test_dag)
+```
+
+
+```{r}
+start_edge <- function(mat) {
+  which(mat == "S", arr.ind = TRUE) |> paste(collapse = ",")
+}
+end_edge <- function(mat) {
+  which(mat == "E", arr.ind = TRUE) |> paste(collapse = ",")
+}
+```
+
+
+```{r}
+start_edge(testdat)
+end_edge(testdat)
+```
+
+
+
+```{r}
+test_paths <- shortest_paths(
+  graph  = test_dag,
+  from   = start_edge(testdat),
+  to     = end_edge(testdat),
+  output = "epath"
+)
+```
+
+
+```{r}
+test_paths$epath[[1]] |>length()
+```
+
+Blimey that was fast. Let's try the actual puzzle.
+
+
+
+```{r}
+realdat <- load_map("aoc12.txt")
+str(realdat)
+```
+
+```{r}
+real_dag <- build_edges(prep_dat(realdat)$input) |>
+            edges_to_dag()
+```
+
+
+
+```{r}
+real_paths <- shortest_paths(
+  graph  = real_dag,
+  from   = start_edge(realdat),
+  to     = end_edge(realdat),
+  output = "epath"
+)
+```
+
+
+### Part 1:
+
+```{r}
+real_paths$epath[[1]] |>length()
+```
+
+What a relief -- that worked.
+
+
+
+### Part 2:
+
+I think I can reuse the DAG.
+
+
+
+
+```{r}
+the_starts <- which(prep_dat(realdat)$input == "a", arr.ind = TRUE)
+head(the_starts)
+```
+
+
+```{r}
+the_end <- which(realdat == "E", arr.ind = TRUE)
+the_end
+```
+
+
+
+```{r}
+path_len <- function(dag, start, end) {
+  the_paths <- shortest_paths(
+    graph  = dag,
+    from   = paste(start, collapse = ","),
+    to     = paste(end,   collapse = ","),
+    output = "epath"
+  )
+  the_paths$epath[[1]] |>length()  
+}
+```
+
+```{r}
+dists <- rep(NA, nrow(the_starts))
+```
+
+Warnings suppressed below... it's all good.
+
+```{r warning=FALSE}
+for (r in 1:nrow(the_starts)) {
+  dists[r] <- path_len(real_dag, the_starts[r,], the_end)
+}
+```
+
+
+
+```{r}
+dists[which(dists  > 0)] |> min()
+```
+
+Hurrah!
+
+
+
+

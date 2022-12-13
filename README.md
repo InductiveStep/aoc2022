@@ -25,3 +25,7 @@ Solutions:
 [Day 10: Cathode-Ray Tube](https://inductivestep.github.io/aoc2022/aoc10.nb.html)
 
 [Day 11: Monkey in the Middle](https://inductivestep.github.io/aoc2022/aoc11.nb.html)
+
+[Day 12: Hill Climbing Algorithm](https://inductivestep.github.io/aoc2022/aoc12.nb.html)
+
+
