@@ -188,13 +188,9 @@ edges_to_dag <- function(edges) {
 ```{r}
 test_dag <- build_edges(prep_dat(testdat)$input) |>
             edges_to_dag()
+test_dag
 ```
 
-
-
-```{r}
-plot(test_dag)
-```
 
 
 ```{r}
@@ -260,15 +256,12 @@ real_paths <- shortest_paths(
 real_paths$epath[[1]] |>length()
 ```
 
-What a relief -- that worked.
-
+Blimey that was still fast.
 
 
 ### Part 2:
 
-I think I can reuse the DAG.
-
-
+I can reuse the DAG, which is another relief -- building it was the slowest part.
 
 
 ```{r}
@@ -299,6 +292,7 @@ path_len <- function(dag, start, end) {
 ```{r}
 dists <- rep(NA, nrow(the_starts))
 ```
+
 
 Warnings suppressed below... it's all good.
 
