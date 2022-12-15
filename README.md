@@ -28,4 +28,4 @@ Solutions:
 
 [Day 12: Hill Climbing Algorithm](https://inductivestep.github.io/aoc2022/aoc12.nb.html)
 
-
+[Day 13: Distress Signal](https://inductivestep.github.io/aoc2022/aoc13.nb.html) - it works for part 1's example input but not the actual input. Le sigh. I'm happy with the use of `gsub`, `parse`, and `eval` though :)

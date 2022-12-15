@@ -1,0 +1,163 @@
+---
+title: "Day 13: Distress Signal"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+```{r}
+read_packets <- function(filename) {
+  dat <- tibble(str = read_lines(filename)) |>
+    filter(str != "") |>
+    mutate(pair = rep(c("L", "R"), n() / 2),
+           i    = rep(1:(n() / 2), 2) |> sort()) |>
+    pivot_wider(values_from = str, names_from = pair)
+  dat
+}
+```
+
+
+```{r}
+ps <- read_packets("aoc13test.txt")
+ps
+```
+
+
+Yep, I am going to use `gsub`, `parse`, and `eval` to turn those list strings into R lists :)
+
+```{r}
+listify <- function(str) {
+  l_fixed <- gsub("\\[", "list(", str)
+  
+  gsub("\\]", ")", l_fixed) |>
+    parse(text = _) |>
+    eval()
+}
+```
+
+```{r}
+listify("[1,2,3,[4,5], 6]")
+```
+
+To help make debugging less painful:
+
+```{r}
+print_list <- function(l) {
+  if (!is.list(l))
+    cat(l)
+  else {
+    cat("[")
+    cat("")
+    i <- 1
+    for (e in l) {
+      print_list(e)
+      if (i == length(l))
+        break;
+      cat(",")
+      i <- i + 1
+    }
+    cat("]")
+  }
+}
+```
+
+```{r}
+print_list(list(list(1,2),list()))
+```
+
+```{r}
+packet_lists_ordered <- function(left, right, verbose = FALSE) {
+  if (verbose) {
+    print_list(left)
+    cat("\n")
+    print_list(right)
+    cat("\n\n")
+  }
+  
+  res <- TRUE
+  
+  if (!is.list(left) && !is.list(right)) {
+    res <- left <= right
+  }
+  else {
+    singleton <- FALSE
+    
+    if (!is.list(left)) {
+      left <- list(left)
+      singleton <- TRUE
+    }
+    if (!is.list(right)) {
+      right <- list(right)
+      singleton <- TRUE
+    }
+    
+    if (length(left) > 0) {
+      for (i in 1:length(left)) {
+        
+        if (i > length(right))
+          break
+        
+        if (!packet_lists_ordered(left[[i]], right[[i]])) {
+          res <- FALSE
+          break
+        }
+      }
+    }
+    
+    # if we're done and still no reason to
+    # think they're out of order, check the length
+    # EXCEPT if one of the inputs was an integer (singleton)
+    if (res && (length(left) > length(right)) && !singleton)
+      res <- FALSE
+  }
+  
+  res
+}
+```
+
+
+```{r}
+packet_strs_ordered <- function(str1, str2) {
+  left  <- listify(str1)
+  right <- listify(str2)
+  
+  packet_lists_ordered(left, right)
+}
+```
+
+
+```{r}
+ps$ordered <- mapply(packet_strs_ordered, ps$L, ps$R)
+ps |> filter(ordered) |> pull(i)
+```
+```{r}
+stopifnot(ps |> filter(ordered) |> pull(i) |> sum() == 13)
+```
+
+
+If we got this far then the code worked for the example.
+
+Onto the actual input.
+
+```{r}
+ps_actual <- read_packets("aoc13.txt")
+```
+
+```{r}
+ps_actual$ordered <-
+  mapply(packet_strs_ordered, ps_actual$L, ps_actual$R)
+```
+
+```{r}
+ps_actual |> filter(ordered) |> pull(i) |> sum()
+```
+
+632 is too small. ARGH!!!
+
