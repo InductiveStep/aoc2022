@@ -1,0 +1,236 @@
+---
+title: "Day 15: Beacon Exclusion Zone - part 1 works"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+```{r}
+read_sensor_dat <- function(filename) {
+  tibble(str = read_lines(filename)) |>
+    extract(
+      str,
+      into = c("Sx", "Sy", "Bx", "By"),
+      regex = "Sensor at x=(-?[0-9]+), y=(-?[0-9]+): closest beacon is at x=(-?[0-9]+), y=(-?[0-9]+)"
+    ) |>
+    mutate_all(as.numeric) |>
+    mutate(
+      d = manhat(Sx, Bx, Sy, By)
+    )
+}
+```
+
+```{r}
+manhat <- function(x1,x2,y1,y2) {
+  abs(x1 - x2) + abs(y1 - y2)
+}
+```
+
+```{r}
+testdat <- read_sensor_dat("aoc15test.txt")
+testdat 
+```
+
+```{r}
+scan_row <- function(sensors, here_y, from_x, to_x) {
+  gaps   <- 0
+  
+  for (here_x in from_x:to_x) {
+    sensors_here <- sensors |>
+      mutate(
+        d_here = manhat(here_x, Sx, here_y, Sy),
+        closer = d_here <= d,
+        beacon_here = here_x == Bx & here_y == By
+      )
+    
+    if (any(sensors_here$closer) && !any(sensors_here$beacon_here))
+    {
+      gaps <- gaps + 1
+    }
+  }
+  
+  gaps
+}
+```
+
+```{r}
+solve_it <- function(dat, y) {
+  scan_row(
+    dat,
+    here_y = y,
+    from_x = min(dat$Sx - dat$d),
+    to_x   = max(dat$Sx + dat$d)
+  )
+}
+```
+
+The right answer is 26:
+
+```{r}
+solve_it(read_sensor_dat("aoc15test.txt"), y = 10)
+```
+Worked!
+
+
+## Part 1:
+
+It's a much bigger search space but I reckon it'll work...
+
+```{r eval=FALSE}
+solve_it(read_sensor_dat("aoc15.txt"), y = 2000000)
+```
+5144286
+
+Yes! Eventually (~4 hours).
+
+
+## Part 2:
+
+Try brute forcing again for the small one.
+
+```{r}
+scan_rect <- function(sensors, from_x, to_x, from_y, to_y) {
+  res <- NA
+  
+  for (here_y in from_y:to_y)
+    for (here_x in from_x:to_x) {
+      sensors_here <- sensors |>
+        mutate(
+          d_here = manhat(here_x, Sx, here_y, Sy),
+          closer = d_here <= d,
+          beacon_here = here_x == Bx & here_y == By
+        )
+      
+      if (!any(sensors_here$closer) &&
+          !any(sensors_here$beacon_here))
+      {
+        res <- c(here_x, here_y)
+        break
+      }
+    }
+  
+  res
+}
+```
+
+
+It's just 400 cells, so this will work.
+
+```{r}
+foundit <- scan_rect(testdat, 0, 20, 0, 20)
+foundit
+```
+
+```{r}
+foundit[1] * 4000000 + foundit[2]
+```
+
+This is correct, so at least I'm confident I get the problem spec.
+
+The full problem has an absurdly large search space so this isn't going to work...
+
+```{r}
+4000000^2
+```
+Let's not.
+
+
+## Some pictures
+
+```{r}
+realdat <- read_sensor_dat("aoc15.txt")
+```
+
+
+
+```{r}
+drawpolys <-
+  function(dat,
+           xlim,
+           ylim,
+           col = "grey",
+           border = "black",
+           outside = "black",
+           xsearchlim,
+           ysearchlim) {
+    plot(
+      1,
+      xlim = xlim,
+      ylim = ylim,
+      xlab = "x",
+      ylab = "y",
+      type = "n"
+    )
+    polygon(
+      x = c(xsearchlim[1], xsearchlim[2], xsearchlim[2], xsearchlim[1]),
+      y = c(ysearchlim[1], ysearchlim[1], ysearchlim[2], ysearchlim[2]),
+      border = outside,
+      col = "yellow"
+    )
+    
+    for (r in 1:nrow(dat)) {
+      x_c   <- dat[r,]$Sx
+      y_c   <- dat[r,]$Sy
+      d_h   <- dat[r,]$d
+      
+      polygon(
+        x = c(x_c, x_c - d_h, x_c, x_c + d_h),
+        y = c(y_c + d_h, y_c, y_c - d_h, y_c),
+        col = col,
+        border = border
+      )
+    }
+    polygon(
+      x = c(xsearchlim[1], xsearchlim[2], xsearchlim[2], xsearchlim[1]),
+      y = c(ysearchlim[1], ysearchlim[1], ysearchlim[2], ysearchlim[2]),
+      border = outside
+    )
+    
+  }
+```
+
+
+
+
+```{r fig.height=4, fig.width=4}
+drawpolys(
+  realdat,
+  c(0, 4000000),
+  c(0, 4000000),
+  col = adjustcolor("grey",alpha.f=.5),
+  border = NA,
+  outside = "cyan",
+  xsearchlim = c(0,4e6),
+  ysearchlim = c(0,4e6)
+)
+```
+
+
+
+```{r fig.height=4, fig.width=4}
+drawpolys(
+  testdat,
+  c(-10, 30),
+  c(-10, 30),
+  col = adjustcolor("grey", alpha.f = .5),
+  border = "black",
+  outside = "cyan",
+  xsearchlim = c(0, 20),
+  ysearchlim = c(0, 20)
+)
+points(14, 11, pch = 19, col = "red")
+```
+
+
+
+To be continued. This looks like an interesting problem to study.
+
+
+
+
+

@@ -1,5 +1,5 @@
 ---
-title: "Day 13: Distress Signal - incomplete answer!"
+title: "Day 13: Distress Signal"
 author: "@Andi@tech.lgbt"
 output: 
   html_notebook: 
@@ -28,7 +28,6 @@ read_packets <- function(filename) {
 ps <- read_packets("aoc13test.txt")
 ps
 ```
-
 
 Yep, I am going to use `gsub`, `parse`, and `eval` to turn those list strings into R lists :)
 
@@ -72,53 +71,56 @@ print_list <- function(l) {
 print_list(list(list(1,2),list()))
 ```
 
+I got the following function to work for the test input, but not the actual puzzle.
+
+Thanks [@jrh-dev](https://github.com/jrh-dev) for the [working logic](https://github.com/jrh-dev/Advent-of-Code-2022/blob/main/R/d13.r), slotted into `packet_lists_ordered`...
+
 ```{r}
-packet_lists_ordered <- function(left, right, verbose = FALSE) {
+packet_lists_ordered <- function(l, r, verbose = FALSE) {
   if (verbose) {
-    print_list(left)
+    print_list(l)
     cat("\n")
-    print_list(right)
+    print_list(r)
     cat("\n\n")
   }
   
-  res <- TRUE
+  if (length(l) == 0 && length(r) == 0)
+    return(NA)
+  else if (length(l) == 0)
+    return(TRUE)
+  else if (length(r) == 0)
+    return(FALSE)
   
-  if (!is.list(left) && !is.list(right)) {
-    res <- left <= right
-  }
-  else {
-    singleton <- FALSE
-    
-    if (!is.list(left)) {
-      left <- list(left)
-      singleton <- TRUE
+  if (is.numeric(l[[1]]) && is.numeric(r[[1]])) {
+    if (l[[1]] < r[[1]])
+      return(TRUE)
+    else if (l[[1]] > r[[1]])
+      return(FALSE)
+    else {
+      l[[1]] = r[[1]] = NULL
+      return(packet_lists_ordered(l, r))
     }
-    if (!is.list(right)) {
-      right <- list(right)
-      singleton <- TRUE
-    }
-    
-    if (length(left) > 0) {
-      for (i in 1:length(left)) {
-        
-        if (i > length(right))
-          break
-        
-        if (!packet_lists_ordered(left[[i]], right[[i]])) {
-          res <- FALSE
-          break
-        }
-      }
-    }
-    
-    # if we're done and still no reason to
-    # think they're out of order, check the length
-    # EXCEPT if one of the inputs was an integer (singleton)
-    if (res && (length(left) > length(right)) && !singleton)
-      res <- FALSE
   }
   
-  res
+  if (is.list(l[[1]]) && is.list(r[[1]])) {
+    tmp = packet_lists_ordered(l[[1]], r[[1]])
+    if (is.na(tmp)) {
+      l[[1]] = r[[1]] = NULL
+      return(packet_lists_ordered(l, r))
+    } else {
+      return(tmp)
+    }
+  }
+  
+  if (is.numeric(l[[1]]) & is.list(r[[1]])) {
+    l[[1]] <- list(l[[1]])
+    return(packet_lists_ordered(l, r))
+  }
+  
+  if (is.list(l[[1]]) & is.numeric(r[[1]])) {
+    r[[1]] <- list(r[[1]])
+    return(packet_lists_ordered(l, r))
+  }
 }
 ```
 
@@ -137,14 +139,16 @@ packet_strs_ordered <- function(str1, str2) {
 ps$ordered <- mapply(packet_strs_ordered, ps$L, ps$R)
 ps |> filter(ordered) |> pull(i)
 ```
+
 ```{r}
 stopifnot(ps |> filter(ordered) |> pull(i) |> sum() == 13)
 ```
 
-
 If we got this far then the code worked for the example.
 
 Onto the actual input.
+
+## Part 1:
 
 ```{r}
 ps_actual <- read_packets("aoc13.txt")
@@ -158,6 +162,43 @@ ps_actual$ordered <-
 ```{r}
 ps_actual |> filter(ordered) |> pull(i) |> sum()
 ```
+Yep -- thanks to [@jrh-dev](https://github.com/jrh-dev).
 
-632 is too small. ARGH!!!
 
+
+## Part 2:
+
+Setup the input to be sorted.
+
+```{r}
+sort_em <- ps_actual |> pivot_longer(cols = c(L,R)) |> pull(value)
+sort_em <- c(sort_em, "[[2]]", "[[6]]")
+```
+
+It's a small input, so this will do...
+
+```{r}
+sink_sort <- function(pstrs) {
+  res <- pstrs
+  for (i in 1:(length(res) - 1))
+    for (j in (i + 1):length(res))
+      if (!packet_strs_ordered(res[i], res[j])) {
+        tmp <- res[i]
+        res[i] <- res[j]
+        res[j] <- tmp
+      }
+
+  res
+}
+```
+
+
+```{r}
+sorted <- sink_sort(sort_em)
+```
+
+```{r}
+which(sorted == "[[2]]") * which(sorted == "[[6]]")
+```
+
+Hurrah.
