@@ -24,6 +24,8 @@ Solutions:
 
 [Day 10: Cathode-Ray Tube](https://inductivestep.github.io/aoc2022/aoc10.nb.html)
 
+Here onwards required thinking:
+
 [Day 11: Monkey in the Middle](https://inductivestep.github.io/aoc2022/aoc11.nb.html). For part 2, I relied on an explanation [on Reddit](https://www.reddit.com/r/adventofcode/comments/zihouc/comment/izrimjo/?utm_source=share&utm_medium=web2x&context=3) to find the right modulus to stop the numbers exploding.
 
 [Day 12: Hill Climbing Algorithm](https://inductivestep.github.io/aoc2022/aoc12.nb.html). This is my favourite. I used it to learn how to use the {igraph} package.
