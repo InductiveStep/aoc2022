@@ -174,7 +174,7 @@ drawpolys <-
     for (r in 1:nrow(dat)) {
       x_c   <- dat[r,]$Sx
       y_c   <- dat[r,]$Sy
-      d_h   <- dat[r,]$d
+      d_h   <- dat[r,]$d + .5
       
       polygon(
         x = c(x_c, x_c - d_h, x_c, x_c + d_h),
