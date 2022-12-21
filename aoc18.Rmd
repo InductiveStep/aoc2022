@@ -1,0 +1,82 @@
+---
+title: "Day 18: Boiling Boulders - work in progress"
+author: "@Andi@tech.lgbt"
+output: 
+  html_notebook: 
+    code_folding: none
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+```{r}
+testdat <- read.table("aoc18.txt", sep = ",") |>
+  rename(x = V1, y = V2, z = V3) |>
+  mutate(nb = paste(x,y,z,sep = ","))
+testdat
+```
+
+
+```{r}
+neighbours <- function(x, y, z) {
+  tibble(
+    x = c(x - 1, x + 1,   x,   x,   x,   x),
+    y = c(y,   y, y - 1, y + 1,   y,   y),
+    z = c(z,   z,   z,   z, z - 1, z + 1)
+  )
+}
+
+neighbours_str <- function(x,y,z) {
+  neighbours(x,y,z) |> mutate(str = paste(x,y,z,sep = ",")) |> pull(str)
+}
+```
+
+
+```{r}
+neighbours_str(2,3,4)
+```
+
+```{r}
+gen_neighbours <- function(dat) {
+  res <- tibble()
+  
+  for (r in 1:nrow(dat)) {
+    res <- rbind(res,
+                 tibble(
+                   nb = neighbours_str(dat[r, ]$x,
+                                       dat[r, ]$y,
+                                       dat[r, ]$z),
+                   x = dat[r, ]$x,
+                   y = dat[r, ]$y,
+                   z = dat[r, ]$z
+                 ))
+  }
+  res
+}
+```
+
+
+
+
+## Part 1:
+
+```{r}
+the_neighbours <- gen_neighbours(testdat)
+the_neighbours
+```
+
+
+The answer is...
+
+```{r}
+the_neighbours |> filter(!nb %in% testdat$nb) |> nrow()
+```
+
+Yep.
+
+
+## Part 2:
+
+TBC
