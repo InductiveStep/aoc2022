@@ -225,7 +225,7 @@ points(14, 11, pch = 19, col = "red")
 ```
 
 
-Okay that's lovely -- I can spot the correct answer. But I really need a way to find the gaps automagically.
+Okay that's lovely -- I can spot the correct answer for the small problem. No chance for the larger one. I really need a way to find the gap automagically.
 
 I went on a highly entertaining though ultimately fruitless journey into integer programming using the Big-M method to try to represent the problem. Looks like {sf} might be able to help. I can reuse `drawpolys`.
 
