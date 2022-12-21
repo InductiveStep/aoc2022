@@ -1,5 +1,5 @@
 ---
-title: "Day 15: Beacon Exclusion Zone - part 1 works"
+title: "Day 15: Beacon Exclusion Zone"
 author: "@Andi@tech.lgbt"
 output: 
   html_notebook: 
@@ -79,7 +79,7 @@ Worked!
 
 ## Part 1:
 
-It's a much bigger search space but I reckon it'll work...
+It's a much bigger search space but I reckon it'll work... Shall send this off to do its thing in the background:
 
 ```{r eval=FALSE}
 solve_it(read_sensor_dat("aoc15.txt"), y = 2000000)
@@ -132,7 +132,7 @@ foundit[1] * 4000000 + foundit[2]
 
 This is correct, so at least I'm confident I get the problem spec.
 
-The full problem has an absurdly large search space so this isn't going to work...
+The full problem has an absurdly large search space so this really isn't going to work...
 
 ```{r}
 4000000^2
@@ -145,8 +145,6 @@ Let's not.
 ```{r}
 realdat <- read_sensor_dat("aoc15.txt")
 ```
-
-
 
 ```{r}
 drawpolys <-
@@ -227,10 +225,79 @@ points(14, 11, pch = 19, col = "red")
 ```
 
 
+Okay that's lovely -- I can spot the correct answer. But I really need a way to find the gaps automagically.
 
-To be continued. This looks like an interesting problem to study.
-
-
-
+I went on a highly entertaining though ultimately fruitless journey into integer programming using the Big-M method to try to represent the problem. Looks like {sf} might be able to help. I can reuse `drawpolys`.
 
 
+```{r}
+library(sf)
+```
+
+
+```{r}
+search_region <- function(xsearchlim, ysearchlim) {
+  coords <-
+    cbind(
+      x = c(xsearchlim[1], xsearchlim[2], xsearchlim[2], xsearchlim[1],
+            xsearchlim[1]),
+      y = c(ysearchlim[1], ysearchlim[1], ysearchlim[2], ysearchlim[2],
+            ysearchlim[1])
+    )
+  list(coords) |> st_polygon()
+}
+```
+
+
+The following function has an entertaining history. I started by trying to union all the shapes together and then fiddling around with intersections and set differences to find the hole. Then I realised I could just begin with a polygon representing the search space and iteratively remove each shape representing the Manhattan area from it. The d + 0.5 bit is magic to approximate an integer space using a continuous one.
+
+```{r}
+find_hole <- function(dat, xsearchlim, ysearchlim) {
+  res <- search_region(xsearchlim, ysearchlim)
+  
+  for (r in 1:nrow(dat)) {
+    x_c   <- dat[r,]$Sx
+    y_c   <- dat[r,]$Sy
+    d_h   <- dat[r,]$d+.5
+    
+    this_poly <- cbind(
+      x = c(x_c, x_c - d_h, x_c, x_c + d_h, x_c),
+      y = c(y_c + d_h, y_c, y_c - d_h, y_c, y_c + d_h)
+    ) |> list() |> st_polygon()
+    
+    res <- st_difference(res, this_poly)
+  }
+  
+  res
+}
+```
+
+
+Okay... this is much better! The correct answer is 14, 11.
+
+```{r}
+find_hole(testdat, c(0,20), c(0,20))
+```
+
+
+Let's try with the actual data:
+
+```{r}
+find_hole(realdat, c(0, 4000000), c(0, 4000000))
+```
+
+That's a significantly smaller search space than I started with :) Fingers crossed.
+
+```{r}
+good_grief <- scan_rect(realdat, 2557297, 2557298, 3267339, 3267340)
+good_grief
+```
+
+Whoop whoop!
+
+```{r}
+options(scipen=999)
+good_grief[1] * 4000000 + good_grief[2]
+```
+
+We're done.
