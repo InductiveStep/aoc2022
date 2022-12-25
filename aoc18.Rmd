@@ -1,5 +1,5 @@
 ---
-title: "Day 18: Boiling Boulders - work in progress"
+title: "Day 18: Boiling Boulders"
 author: "@Andi@tech.lgbt"
 output: 
   html_notebook: 
@@ -8,34 +8,40 @@ output:
 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
+library(tictoc)
 ```
 
 
 ```{r}
-testdat <- read.table("aoc18.txt", sep = ",") |>
+myCubeColour <- adjustcolor("#ff1199", alpha.f = 0.8)
+```
+
+
+```{r}
+dat <- read.table("aoc18.txt", sep = ",") |>
   rename(x = V1, y = V2, z = V3) |>
   mutate(nb = paste(x,y,z,sep = ","))
-testdat
+head(dat)
 ```
 
 
 ```{r}
 neighbours <- function(x, y, z) {
   tibble(
-    x = c(x - 1, x + 1,   x,   x,   x,   x),
-    y = c(y,   y, y - 1, y + 1,   y,   y),
-    z = c(z,   z,   z,   z, z - 1, z + 1)
+    x = c(x - 1, x + 1,     x,     x,     x,     x),
+    y = c(    y,     y, y - 1, y + 1,     y,     y),
+    z = c(    z,     z,     z,     z, z - 1, z + 1)
   )
 }
 
-neighbours_str <- function(x,y,z) {
+neighbours_str <- function(x, y, z) {
   neighbours(x,y,z) |> mutate(str = paste(x,y,z,sep = ",")) |> pull(str)
 }
 ```
 
 
 ```{r}
-neighbours_str(2,3,4)
+neighbours_str(0,0,0)
 ```
 
 ```{r}
@@ -63,20 +69,146 @@ gen_neighbours <- function(dat) {
 ## Part 1:
 
 ```{r}
-the_neighbours <- gen_neighbours(testdat)
-the_neighbours
+tic()
+the_neighbours <- gen_neighbours(dat)
+toc()
+```
+
+```{r}
+head(the_neighbours)
 ```
 
 
 The answer is...
 
 ```{r}
-the_neighbours |> filter(!nb %in% testdat$nb) |> nrow()
+the_answer <- the_neighbours |> filter(!nb %in% dat$nb)
+the_answer |> nrow()
 ```
 
-Yep.
+3494 is correct.
 
 
 ## Part 2:
 
-TBC
+Let's have a look...
+
+```{r}
+#remotes::install_github('coolbutuseless/isocubes')
+library(isocubes)
+library(grid)
+library(purrr)
+```
+
+```{r}
+grid.newpage()
+isocubesGrob(dat, ysize = 1/40, fill = myCubeColour) |>
+  grid.draw() 
+```
+
+
+So, the plan for this one -- another graph, this time undirected. Plop a cuboid over the top of the shape above, remove the shape, leaving space, and then setup a graph that represents all adjacent space cubes. Finally, for each of those cubes, see if it's possible to reach somewhere outside, say the mins of x, y, and z.
+
+
+The following makes the space:
+
+```{r}
+empty_cube <- function(dat) {
+  x_ran <- c(min(dat$x) - 1, max(dat$x) + 1)
+  y_ran <- c(min(dat$y) - 1, max(dat$y) + 1)
+  z_ran <- c(min(dat$z) - 1, max(dat$z) + 1)
+  
+  edging_strs <- edging(x_ran, y_ran, z_ran)$nb
+  
+  expand.grid(x = x_ran[1]:x_ran[2],
+              y = y_ran[1]:y_ran[2],
+              z = z_ran[1]:z_ran[2]) |>
+    mutate(nb = paste(x, y, z, sep = ",")) |>
+    filter(!nb %in% dat$nb)
+}
+```
+
+```{r}
+frame_around <- empty_cube(dat)
+```
+
+
+Now the graph action.
+
+```{r message=FALSE, warning=FALSE}
+library(igraph)
+```
+
+
+
+```{r}
+buildgraph <- function(dat) {
+  res <- data.frame()
+  
+  for (r in 1:nrow(dat)) {
+    neighbours <- neighbours_str(dat[r,]$x, dat[r,]$y, dat[r,]$z)
+    
+    there_str <- dat |>
+      filter(nb %in% neighbours) |>
+      pull(nb)
+    
+    here_str  <-
+      rep(paste(dat[r,]$x, dat[r,]$y, dat[r,]$z, sep = ","),
+          length(there_str))
+    
+    res <-
+      rbind(res, data.frame(here = here_str, there = there_str))
+  }
+  
+  res |> unique() |> graph.data.frame(directed = FALSE)
+}
+```
+
+
+```{r}
+tic()
+space_graph <- buildgraph(frame_around)
+toc()
+```
+
+
+
+```{r}
+all_outside <- function(the_graph, the_space_dat) {
+  res <- the_space_dat
+  res$outside <- NA
+  vs <- attr(V(space_graph), "names")
+  
+  epitome_of_out <- c(min(the_space_dat$x),
+                      min(the_space_dat$y),
+                      min(the_space_dat$z)) |> paste(collapse = ",")
+  
+  for (r in 1:nrow(res)) {
+    there_str <- res[r,]$nb
+    if (!there_str %in% vs)
+      res$outside[r] <- FALSE
+    else
+      res$outside[r] <-
+        !is.infinite(distances(the_graph, epitome_of_out, there_str, mode = "out"))
+  }
+  
+  res
+}
+```
+
+
+```{r}
+tic()
+inside <- all_outside(space_graph, frame_around) |>
+  filter(!outside)
+toc()
+```
+
+
+```{r}
+the_answer <- the_neighbours |> filter(!nb %in% dat$nb &
+                                       !nb %in% inside$nb)
+the_answer |> nrow()
+```
+
+YES.
