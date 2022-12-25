@@ -118,8 +118,6 @@ empty_cube <- function(dat) {
   y_ran <- c(min(dat$y) - 1, max(dat$y) + 1)
   z_ran <- c(min(dat$z) - 1, max(dat$z) + 1)
   
-  edging_strs <- edging(x_ran, y_ran, z_ran)$nb
-  
   expand.grid(x = x_ran[1]:x_ran[2],
               y = y_ran[1]:y_ran[2],
               z = z_ran[1]:z_ran[2]) |>
