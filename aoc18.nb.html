@@ -1841,8 +1841,8 @@ neighbours_str &lt;- function(x, y, z) {
 the_neighbours &lt;- gen_neighbours(dat)
 toc()</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiMTUuODYgc2VjIGVsYXBzZWRcbiJ9 -->
-<pre><code>15.86 sec elapsed</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiMjIuMjIgc2VjIGVsYXBzZWRcbiJ9 -->
+<pre><code>22.22 sec elapsed</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1970,8 +1970,8 @@ somewhere outside, say the mins of x, y, and z.</p>
 space_graph &lt;- buildgraph(frame_around)
 toc()</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiMTk3LjkxIHNlYyBlbGFwc2VkXG4ifQ== -->
-<pre><code>197.91 sec elapsed</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiMzI3LjIzIHNlYyBlbGFwc2VkXG4ifQ== -->
+<pre><code>327.23 sec elapsed</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -2009,6 +2009,9 @@ inside &lt;- all_outside(space_graph, frame_around) |&gt;
   filter(!outside)
 toc()</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiMTQ2IHNlYyBlbGFwc2VkXG4ifQ== -->
+<pre><code>146 sec elapsed</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
@@ -2018,6 +2021,9 @@ toc()</code></pre>
                                        !nb %in% inside$nb)
 the_answer |&gt; nrow()</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDIwNjJcbiJ9 -->
+<pre><code>[1] 2062</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>YES.</p>
