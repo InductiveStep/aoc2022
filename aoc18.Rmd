@@ -169,8 +169,6 @@ space_graph <- buildgraph(frame_around)
 toc()
 ```
 
-
-
 ```{r}
 all_outside <- function(the_graph, the_space_dat) {
   res <- the_space_dat
